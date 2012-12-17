@@ -70,5 +70,14 @@ namespace CatchMouse
             }
             MarkersChanged(this, e);
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (comboBox1.SelectedIndex < 0)
+            return;
+            Camera c = (Camera)comboBox1.SelectedItem;
+            c.ShowPropertiesDialog(this.Handle);
+            
+        }
     }
 }
