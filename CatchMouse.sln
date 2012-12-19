@@ -30,6 +30,7 @@ Global
 		{030F0211-B3C1-48E3-825A-E1A4CE95C092}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{030F0211-B3C1-48E3-825A-E1A4CE95C092}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{030F0211-B3C1-48E3-825A-E1A4CE95C092}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{030F0211-B3C1-48E3-825A-E1A4CE95C092}.Debug|x86.Build.0 = Debug|Any CPU
 		{030F0211-B3C1-48E3-825A-E1A4CE95C092}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{030F0211-B3C1-48E3-825A-E1A4CE95C092}.Release|Any CPU.Build.0 = Release|Any CPU
 		{030F0211-B3C1-48E3-825A-E1A4CE95C092}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU

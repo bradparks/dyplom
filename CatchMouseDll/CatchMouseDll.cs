@@ -14,27 +14,27 @@ namespace CatchMouseDll
 {
     public class CatchMouseDll
     {
-        public TouchlessMgr touchlessMgr = new TouchlessMgr();
-        private System.Windows.Forms.PictureBox picturebox;
-        public Aktywizacja_Obrazu a_obrazu;
-        private bool flaga_obraz_przechwycony = false;
-
+        public TouchlessMgr touchlessMgr ;
+        public Aktywizacja_Obrazu Aktywacja_Obrazu = new Aktywizacja_Obrazu();
+        public Markery Markery = new Markery();
 
         public CatchMouseDll(System.Windows.Forms.PictureBox pictureb)
         {
-            touchlessMgr = new TouchlessMgr();
-            picturebox = pictureb; 
+            Wspolny.w_touchlessMgr = new TouchlessMgr();
+            Wspolny.w_picturebox = pictureb;
+            touchlessMgr = Wspolny.w_touchlessMgr;
         }
+        /*
         /// <summary>
         /// przechwytuje obraz z aktywnej kamery
         /// </summary>
         /// <returns>zwraca obraz PictureBoxa</returns>
         public System.Windows.Forms.PictureBox Przechwyt_Obrazu(){
-            a_obrazu = new Aktywizacja_Obrazu(picturebox,touchlessMgr);
-            picturebox = a_obrazu.Malowanie_Kamery();
-            touchlessMgr = a_obrazu.touchlessMgr;
+            a_obrazu = new Aktywizacja_Obrazu();
+            Wspolny.w_picturebox = a_obrazu.Malowanie_Kamery();
+            Wspolny.w_touchlessMgr = a_obrazu.touchlessMgr;
             flaga_obraz_przechwycony = true;
-            return picturebox;
+            return Wspolny.w_picturebox;
         }
         /// <summary>
         /// przechwytuje obraz z aktywnej kamery
@@ -45,17 +45,17 @@ namespace CatchMouseDll
         {
             if (flaga_obraz_przechwycony == false)
             {
-                a_obrazu = new Aktywizacja_Obrazu(picturebox, touchlessMgr);
-                picturebox = a_obrazu.Malowanie_Kamery();
-                touchlessMgr = a_obrazu.touchlessMgr;
+                a_obrazu = new Aktywizacja_Obrazu();
+                Wspolny.w_picturebox = a_obrazu.Malowanie_Kamery();
+                Wspolny.w_touchlessMgr = a_obrazu.touchlessMgr;
                 flaga_obraz_przechwycony = true;
             }
             else
             {
-                picturebox = a_obrazu.Zmiana_Numeru_Kamery(numer_kamery);
-                touchlessMgr = a_obrazu.touchlessMgr;
+                Wspolny.w_picturebox = a_obrazu.Zmiana_Numeru_Kamery(numer_kamery);
+                Wspolny.w_touchlessMgr = a_obrazu.touchlessMgr;
             }
-            return picturebox;
+            return Wspolny.w_picturebox;
         }
         public bool Pauza
         {
@@ -72,8 +72,8 @@ namespace CatchMouseDll
         public System.Windows.Forms.PictureBox dodaj_marker()
         {
             a_obrazu.doadnie_markera();
-            return picturebox;
-        }
+            return Wspolny.w_picturebox;
+        }*/
     }
    
     public class marker_na_monitor
