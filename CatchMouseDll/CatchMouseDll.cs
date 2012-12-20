@@ -17,6 +17,7 @@ namespace CatchMouseDll
         public TouchlessMgr touchlessMgr ;
         public Aktywizacja_Obrazu Aktywacja_Obrazu = new Aktywizacja_Obrazu();
         public Markery Markery = new Markery();
+        public Symulator_Myszki Symulator_Myszki = new Symulator_Myszki();
 
         public CatchMouseDll(System.Windows.Forms.PictureBox pictureb)
         {

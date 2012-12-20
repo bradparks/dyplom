@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Windows.Forms;
 
+
 namespace CatchMouseDll
 {
 
@@ -28,6 +29,34 @@ namespace CatchMouseDll
         public static bool flaga_dodanie_markera;
         public static Point srodek_zaznaczenia_markera;  //_markerCenter
         public static float promien_zaznaczenia_markera; //_markerRadius
+
+        public static int X()
+        {
+            int suma_x = 0;
+            int ilosc = 0;
+            object obi = new object();
+            foreach (Marker mk in Wspolny.w_touchlessMgr.Markers)
+            {
+                ilosc++;
+                suma_x += mk.CurrentData.X;
+            }
+            suma_x = suma_x / ilosc;
+            return suma_x;
+        }
+
+        public static int Y()
+        {
+            int suma_y = 0;
+            int ilosc = 0;
+            object obi = new object();
+            foreach (Marker mk in Wspolny.w_touchlessMgr.Markers)
+            {
+                ilosc++;
+                suma_y += mk.CurrentData.Y;
+            }
+            suma_y = suma_y / ilosc;
+            return suma_y;
+        }
     }
     /// <summary>
     /// klasa odpowiedzialna za przechwytywanie obrazu z kamery do Wspolny.w_pictureboxa
@@ -156,8 +185,6 @@ namespace CatchMouseDll
 
     public class Markery
     {
-        Marker Mark;
-       
         public delegate void Zmiana_Ilosci_Markerow(object sender, EventArgs e);
         public event Zmiana_Ilosci_Markerow MarkerChanged;
         protected void OnMarkerChanged()
@@ -207,7 +234,7 @@ namespace CatchMouseDll
             Wspolny.srodek_zaznaczenia_markera.Y = (Wspolny.srodek_zaznaczenia_markera.Y * Wspolny.ostatnia_klatka.Height) / Wspolny.w_picturebox.Height;
             Wspolny.promien_zaznaczenia_markera = (Wspolny.promien_zaznaczenia_markera * Wspolny.ostatnia_klatka.Height) / Wspolny.w_picturebox.Height;
             // Add the marker
-            Mark = Wspolny.w_touchlessMgr.AddMarker("Marker #" + (Wspolny.w_touchlessMgr.MarkerCount + 1).ToString(), (Bitmap)Wspolny.ostatnia_klatka, Wspolny.srodek_zaznaczenia_markera, Wspolny.promien_zaznaczenia_markera);
+            Wspolny.w_touchlessMgr.AddMarker( (Wspolny.w_touchlessMgr.MarkerCount + 1).ToString(), (Bitmap)Wspolny.ostatnia_klatka, Wspolny.srodek_zaznaczenia_markera, Wspolny.promien_zaznaczenia_markera);
 
             // Restore the app to its normal state and clear the selection area adorment
             Wspolny.srodek_zaznaczenia_markera = new Point();
@@ -243,5 +270,104 @@ namespace CatchMouseDll
             }
         }
     }
+    
 
+    public class Symulator_Myszki
+    {
+        public Martwa_Strefa Martwa_Strefa = new Martwa_Strefa() ;
+    }
+    public class Martwa_Strefa
+    {
+        public int martwa_x=5;
+        public int martwa_y=5;
+        public double przyspieszenie_x = 1;
+        public double przyspieszenie_y = 1;
+
+        int start_x = 0;
+        int start_y = 0;
+        double curent_x = 0;
+        double curent_y = 0;
+        int stary_curent_x;
+        int stary_curent_y;
+        DateTime CurrTime;
+        private static Marker _markerSelected;
+        int ilosc_markerow;
+
+        public void start()
+        {
+            _markerSelected.OnChange -= new EventHandler<MarkerEventArgs>(OnSelectedMouseUpdate);
+        }
+
+        public void OnSelectedMouseUpdate(object sender, MarkerEventArgs args)
+        {/*
+            this.BeginInvoke(new Action<MarkerEventData>(UpdateMouseDataInUI), new object[] { args.EventData });
+        }
+
+        private void UpdateMouseDataInUI(MarkerEventData data)
+        {*/
+            if (ilosc_markerow != Wspolny.w_touchlessMgr.Markers.Count)
+            {
+                start_x = Wspolny.w_touchlessMgr.Markers[Wspolny.w_touchlessMgr.Markers.Count - 1].CurrentData.X;
+                start_y = Wspolny.w_touchlessMgr.Markers[Wspolny.w_touchlessMgr.Markers.Count - 1].CurrentData.Y;
+                curent_x = 100;
+                curent_y = 100;
+                ilosc_markerow = Wspolny.w_touchlessMgr.Markers.Count;
+
+
+            }
+            int poz_x = 0;
+            int poz_y = 0;
+
+            poz_x = Wspolny.w_touchlessMgr.Markers[0].CurrentData.X;
+            poz_y = Wspolny.w_touchlessMgr.Markers[0].CurrentData.Y;
+
+          //  if (flaga_mouse == true)
+            {
+
+                poz_x = Wspolny.X();
+                poz_y = Wspolny.Y();
+                if (start_x > poz_x + martwa_x || start_x < poz_x - martwa_x)
+                {
+                    if (curent_x < SystemInformation.PrimaryMonitorSize.Width)
+                    {
+                        curent_x += (start_x - poz_x) * przyspieszenie_x / 10;
+                        if (Convert.ToInt32(curent_x) <= 10)
+                            curent_x = 10;
+                       // SetCursorPos(Convert.ToInt32(curent_x), Convert.ToInt32(curent_y));
+                        CurrTime = DateTime.Now;
+                    }
+                    else
+                    {
+                        curent_x -= 5;
+                    }
+                }
+
+
+                if (start_y > poz_y + martwa_y || start_y < poz_y - martwa_y)
+                {
+                    if (curent_y < SystemInformation.PrimaryMonitorSize.Height - 20)
+                    {
+                        curent_y -= (start_y - poz_y) * przyspieszenie_y / 10;
+                        if (Convert.ToInt32(curent_y) <= 20)
+                            curent_y = 10;
+                     //   SetCursorPos(Convert.ToInt32(curent_x), Convert.ToInt32(curent_y));
+                        CurrTime = DateTime.Now;
+                    }
+                    else
+                    {
+                        curent_y -= 5;
+                    }
+                }
+/*
+                if ((DateTime.Now.Second - CurrTime.Second) > czas_reakcji)
+                {
+                    if (flaga_okna_myszy == false)
+                        stary_curent_x = Convert.ToInt32(curent_x);
+                    stary_curent_y = Convert.ToInt32(curent_y);
+                    myForm.Location = new Point(Convert.ToInt32(curent_x) - 100, Convert.ToInt32(curent_y) - 100);
+                    myForm.Visible = true;
+                }*/
+            }
+        }
+    }
 }

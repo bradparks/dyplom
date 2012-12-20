@@ -33,10 +33,11 @@ namespace CatchMouse
         private void MarkersChanged(object sender, EventArgs e)
         {
             checkedListBox1.Items.Clear();
-            foreach (Marker mk in CMdllka.touchlessMgr.Markers)
+            for (int i = 0; i < CMdllka.touchlessMgr.MarkerCount; i++)
             {
-                checkedListBox1.Items.Add(mk.ToString(),true);
-                mk.Highlight = true;
+                CMdllka.touchlessMgr.Markers[i].Name = (i+1).ToString();
+                checkedListBox1.Items.Add(CMdllka.touchlessMgr.Markers[i].ToString(), true);
+                CMdllka.touchlessMgr.Markers[i].Highlight = true;
             }
             zmiana_markera();
         }
@@ -56,6 +57,7 @@ namespace CatchMouse
                 }
             }
             MarkersChanged(this, e);
+            
         }
 
         private void zmiana_markera()
@@ -130,6 +132,11 @@ namespace CatchMouse
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             CMdllka.touchlessMgr.Markers[index_zaznaczonego_markera].SmoothingEnabled = checkBox1.Checked;
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            CMdllka.Symulator_Myszki.Martwa_Strefa.start();
         }
     }
 }
