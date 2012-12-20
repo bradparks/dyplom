@@ -14,6 +14,8 @@ namespace CatchMouse
     public partial class Form1 : Form
     {
         CatchMouseDll.CatchMouseDll CMdllka;
+        int index_zaznaczonego_markera = 0;
+
 
         public Form1()
         {
@@ -36,24 +38,7 @@ namespace CatchMouse
                 checkedListBox1.Items.Add(mk.ToString(),true);
                 mk.Highlight = true;
             }
-        }
-
-
-        
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            if (comboBox1.SelectedIndex < 0)
-            return;
-            Camera c = (Camera)comboBox1.SelectedItem;
-            c.ShowPropertiesDialog(this.Handle);
-            
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.Markey = CMdllka.touchlessMgr;
-            Properties.Settings.Default.Save();
+            zmiana_markera();
         }
 
         private void button1_Click_1(object sender, EventArgs e)
@@ -63,9 +48,6 @@ namespace CatchMouse
 
         private void button2_Click_1(object sender, EventArgs e)
         {
-            button3.Text = "oko";
-            Properties.Settings.Default.Setting = button2.Text + 1;
-            Properties.Settings.Default.Save();
             for (int i = checkedListBox1.Items.Count - 1; i >= 0; i--)
             {
                 if (checkedListBox1.GetItemChecked(i))
@@ -76,9 +58,40 @@ namespace CatchMouse
             MarkersChanged(this, e);
         }
 
+        private void zmiana_markera()
+        {
+            int ilosc_aktywnych_markerow = 0;
+            
+            for (int i = 0; i < CMdllka.touchlessMgr.Markers.Count; i++)
+            {
+                if (CMdllka.touchlessMgr.Markers[i].Highlight == true)
+                {
+                    ilosc_aktywnych_markerow++;
+                    index_zaznaczonego_markera = i;
+                }
+            }
+            if (ilosc_aktywnych_markerow == 1)
+            {
+                label1.Text = CMdllka.touchlessMgr.Markers[index_zaznaczonego_markera].ToString();
+                panel1.Enabled = true;
+                uzupelnienie_danych_markera(index_zaznaczonego_markera);
+            }
+            else
+            {
+                label1.Text = "Zaznacz tylko jeden marker do edycji ustawień";
+                panel1.Enabled = false;
+            }
+        }
+
+        private void uzupelnienie_danych_markera(int numer_markera)
+        {
+            numericUpDown1.Value = CMdllka.touchlessMgr.Markers[numer_markera].Threshold;
+        }
+
         private void checkedListBox1_SelectedIndexChanged_1(object sender, EventArgs e)
         {
             CMdllka.touchlessMgr.Markers[checkedListBox1.SelectedIndex].Highlight = checkedListBox1.GetItemChecked(checkedListBox1.SelectedIndex);
+            zmiana_markera();
         }
 
         private void comboBox1_SelectedIndexChanged_1(object sender, EventArgs e)
@@ -88,7 +101,35 @@ namespace CatchMouse
 
         private void button3_Click_1(object sender, EventArgs e)
         {
+            if (comboBox1.SelectedIndex < 0)
+                return;
+            Camera c = (Camera)comboBox1.SelectedItem;
+            c.ShowPropertiesDialog(this.Handle);
+        }
 
+        private void tabPage1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            CMdllka.touchlessMgr.Markers[index_zaznaczonego_markera].Threshold =Convert.ToInt32(numericUpDown1.Value);
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            CMdllka.touchlessMgr.Markers[index_zaznaczonego_markera].SmoothingEnabled = checkBox1.Checked;
         }
     }
 }

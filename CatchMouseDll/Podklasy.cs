@@ -25,6 +25,9 @@ namespace CatchMouseDll
         public static System.Windows.Forms.PictureBox w_picturebox;
         public static bool pauza;
         public static Image ostatnia_klatka; //_latestFrame
+        public static bool flaga_dodanie_markera;
+        public static Point srodek_zaznaczenia_markera;  //_markerCenter
+        public static float promien_zaznaczenia_markera; //_markerRadius
     }
     /// <summary>
     /// klasa odpowiedzialna za przechwytywanie obrazu z kamery do Wspolny.w_pictureboxa
@@ -34,9 +37,6 @@ namespace CatchMouseDll
         
         private DateTime czasOstatniejKlatki;
         private int licznikKlatek=0;
-        protected Point srodek_zaznaczenia_markera;  //_markerCenter
-        protected float promien_zaznaczenia_markera; //_markerRadius
-        protected bool flaga_dodanie_markera;
         
 
         /// <summary>
@@ -127,13 +127,13 @@ namespace CatchMouseDll
             {
                 // Rysuje ostatnią klatke z aktywnej kamery
                 e.Graphics.DrawImage(Wspolny.ostatnia_klatka, 0, 0, Wspolny.w_picturebox.Width, Wspolny.w_picturebox.Height);
-                if (flaga_dodanie_markera)
+                if (Wspolny.flaga_dodanie_markera == true)
                 {
-                    MessageBox.Show("doda");
                     Pen pen = new Pen(Brushes.Red, 1);
-                    e.Graphics.DrawEllipse(pen,srodek_zaznaczenia_markera.X - promien_zaznaczenia_markera, srodek_zaznaczenia_markera.Y - promien_zaznaczenia_markera,
-                        2 * promien_zaznaczenia_markera, 2 * promien_zaznaczenia_markera);
-                    
+                    e.Graphics.DrawEllipse(pen, Wspolny.srodek_zaznaczenia_markera.X - Wspolny.promien_zaznaczenia_markera,
+                        Wspolny.srodek_zaznaczenia_markera.Y - Wspolny.promien_zaznaczenia_markera,
+                        2 * Wspolny.promien_zaznaczenia_markera, 2 * Wspolny.promien_zaznaczenia_markera);
+
                 }
             }
         }
@@ -146,7 +146,7 @@ namespace CatchMouseDll
             // Przeliczanie FPS
             licznikKlatek++;
             double milliseconds = (DateTime.Now.Ticks - czasOstatniejKlatki.Ticks) / TimeSpan.TicksPerMillisecond;
-            if (Wspolny.pauza  != true)
+            if (Wspolny.pauza == false)
             {
                 Wspolny.ostatnia_klatka = args.Image;
                 Wspolny.w_picturebox.Invalidate();
@@ -154,7 +154,7 @@ namespace CatchMouseDll
         }
     }
 
-    public class Markery :Aktywizacja_Obrazu
+    public class Markery
     {
         Marker Mark;
        
@@ -171,7 +171,6 @@ namespace CatchMouseDll
         public System.Windows.Forms.PictureBox doadnie_markera(PictureBox picturebox)
         {
             Wspolny.w_picturebox = picturebox;
-            base.flaga_dodanie_markera = true;
             Wspolny.pauza = true;
             
             Wspolny.w_picturebox.MouseDown += new MouseEventHandler(w_picturebox_MouseDown);
@@ -187,8 +186,9 @@ namespace CatchMouseDll
         /// <param name="e"></param>
         private void w_picturebox_MouseDown(object sender, MouseEventArgs e)
         {
-            base.srodek_zaznaczenia_markera = e.Location;
-            base.promien_zaznaczenia_markera = 0;
+            Wspolny.flaga_dodanie_markera = true;
+            Wspolny.srodek_zaznaczenia_markera = e.Location;
+            Wspolny.promien_zaznaczenia_markera = 0;
         }
 
         /// <summary>
@@ -198,26 +198,26 @@ namespace CatchMouseDll
         /// <param name="e"></param>
         private void w_picturebox_MouseUp(object sender, MouseEventArgs e)
         {
-            int dx = e.X - base.srodek_zaznaczenia_markera.X;
-            int dy = e.Y - base.srodek_zaznaczenia_markera.Y;
-            base.promien_zaznaczenia_markera = (float)Math.Sqrt(dx * dx + dy * dy);
+            int dx = e.X - Wspolny.srodek_zaznaczenia_markera.X;
+            int dy = e.Y - Wspolny.srodek_zaznaczenia_markera.Y;
+            Wspolny.promien_zaznaczenia_markera = (float)Math.Sqrt(dx * dx + dy * dy);
             // Adjust for the image/display scaling (assumes proportional scaling)
 
-            base.srodek_zaznaczenia_markera.X = (base.srodek_zaznaczenia_markera.X * Wspolny.ostatnia_klatka.Width) / Wspolny.w_picturebox.Width;
-            base.srodek_zaznaczenia_markera.Y = (base.srodek_zaznaczenia_markera.Y * Wspolny.ostatnia_klatka.Height) / Wspolny.w_picturebox.Height;
-            base.promien_zaznaczenia_markera = (base.promien_zaznaczenia_markera * Wspolny.ostatnia_klatka.Height) / Wspolny.w_picturebox.Height;
+            Wspolny.srodek_zaznaczenia_markera.X = (Wspolny.srodek_zaznaczenia_markera.X * Wspolny.ostatnia_klatka.Width) / Wspolny.w_picturebox.Width;
+            Wspolny.srodek_zaznaczenia_markera.Y = (Wspolny.srodek_zaznaczenia_markera.Y * Wspolny.ostatnia_klatka.Height) / Wspolny.w_picturebox.Height;
+            Wspolny.promien_zaznaczenia_markera = (Wspolny.promien_zaznaczenia_markera * Wspolny.ostatnia_klatka.Height) / Wspolny.w_picturebox.Height;
             // Add the marker
-            Mark = Wspolny.w_touchlessMgr.AddMarker("Marker #" + (Wspolny.w_touchlessMgr.MarkerCount + 1).ToString(), (Bitmap)Wspolny.ostatnia_klatka, base.srodek_zaznaczenia_markera, base.promien_zaznaczenia_markera);
+            Mark = Wspolny.w_touchlessMgr.AddMarker("Marker #" + (Wspolny.w_touchlessMgr.MarkerCount + 1).ToString(), (Bitmap)Wspolny.ostatnia_klatka, Wspolny.srodek_zaznaczenia_markera, Wspolny.promien_zaznaczenia_markera);
 
             // Restore the app to its normal state and clear the selection area adorment
-            base.srodek_zaznaczenia_markera = new Point();
+            Wspolny.srodek_zaznaczenia_markera = new Point();
             Wspolny.w_picturebox.Image = new Bitmap(Wspolny.w_picturebox.Width, Wspolny.w_picturebox.Height);
             
             Wspolny.w_picturebox.MouseDown -= new MouseEventHandler(w_picturebox_MouseDown);
             Wspolny.w_picturebox.MouseMove -= new MouseEventHandler(w_picturebox_MouseMove);
             Wspolny.w_picturebox.MouseUp -= new MouseEventHandler(w_picturebox_MouseUp);
 
-            base.flaga_dodanie_markera = false;
+            Wspolny.flaga_dodanie_markera = false;
             Wspolny.pauza = false;
             OnMarkerChanged();
             
@@ -232,12 +232,12 @@ namespace CatchMouseDll
         private void w_picturebox_MouseMove(object sender, MouseEventArgs e)
         {
             // If the user is selecting a marker, draw a circle of their selection as a selection adornment
-            if (!base.srodek_zaznaczenia_markera.IsEmpty)
+            if (!Wspolny.srodek_zaznaczenia_markera.IsEmpty)
             {
                 // Get the current radius
-                int dx = e.X - base.srodek_zaznaczenia_markera.X;
-                int dy = e.Y - base.srodek_zaznaczenia_markera.Y;
-                base.promien_zaznaczenia_markera = (float)Math.Sqrt(dx * dx + dy * dy);
+                int dx = e.X - Wspolny.srodek_zaznaczenia_markera.X;
+                int dy = e.Y - Wspolny.srodek_zaznaczenia_markera.Y;
+                Wspolny.promien_zaznaczenia_markera = (float)Math.Sqrt(dx * dx + dy * dy);
                 // Cause display update
                 Wspolny.w_picturebox.Invalidate();
             }

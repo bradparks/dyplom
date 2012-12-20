@@ -24,6 +24,13 @@ namespace CatchMouseDll
             Wspolny.w_picturebox = pictureb;
             touchlessMgr = Wspolny.w_touchlessMgr;
         }
+
+        public CatchMouseDll(System.Windows.Forms.PictureBox pictureb, TouchlessMgr  touchlessMenager)
+        {
+            Wspolny.w_touchlessMgr = touchlessMenager;
+            Wspolny.w_picturebox = pictureb;
+            touchlessMgr = Wspolny.w_touchlessMgr;
+        }
         /*
         /// <summary>
         /// przechwytuje obraz z aktywnej kamery

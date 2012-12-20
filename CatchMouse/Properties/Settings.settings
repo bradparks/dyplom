@@ -5,8 +5,5 @@
     <Setting Name="Markey" Type="TouchlessLib.TouchlessMgr" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Setting" Type="System.String" Scope="User">
-      <Value Profile="(Default)">oko</Value>
-    </Setting>
   </Settings>
 </SettingsFile>
