@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Windows.Forms;
 
+using Hotkeys;
 
 namespace CatchMouseDll
 {
@@ -276,49 +277,72 @@ namespace CatchMouseDll
     {
         public Martwa_Strefa Martwa_Strefa = new Martwa_Strefa() ;
     }
+    /// <summary>
+    /// Klasa odpoweidzialna za symulacje myszy z strefą bezruchu
+    /// </summary>
     public class Martwa_Strefa
     {
+        [DllImport("user32")]
+        private static extern int SetCursorPos(int x, int y);
+
         public int martwa_x=5;
         public int martwa_y=5;
-        public double przyspieszenie_x = 1;
-        public double przyspieszenie_y = 1;
+        public int przyspieszenie_x = 11;
+        public int przyspieszenie_y = 11;
+        public bool flga_dzialania = false;
 
         int start_x = 0;
         int start_y = 0;
-        double curent_x = 0;
-        double curent_y = 0;
-        int stary_curent_x;
-        int stary_curent_y;
+        public double curent_x = 0;
+        public double curent_y = 0;
         DateTime CurrTime;
-        private static Marker _markerSelected;
+        List<Marker> _markerSelected = new List<Marker>();
         int ilosc_markerow;
 
-        public void start()
+        Form1 myForm;
+
+        public void Start(List<int> numerek)
         {
-            _markerSelected.OnChange -= new EventHandler<MarkerEventArgs>(OnSelectedMouseUpdate);
+            for (int i = 0; i < numerek.Count ; i++)
+            {
+                _markerSelected.Add(Wspolny.w_touchlessMgr.Markers[numerek[i]]);
+                _markerSelected[i].OnChange += new EventHandler<MarkerEventArgs>(OnSelectedMouseUpdate);
+            }
+            myForm = new Form1();
+            myForm.Show();
+            myForm.Visible = false;
+            flga_dzialania = true;
+        }
+        /// <summary>
+        /// Zatrzymanie Martwej Strefy
+        /// </summary>
+        public void Stop()
+        {
+            foreach (Marker mk in _markerSelected)
+            {
+                mk.OnChange -= new EventHandler<MarkerEventArgs>(OnSelectedMouseUpdate);
+            }
+            _markerSelected.Clear();
+            flga_dzialania = false;
         }
 
         public void OnSelectedMouseUpdate(object sender, MarkerEventArgs args)
-        {/*
-            this.BeginInvoke(new Action<MarkerEventData>(UpdateMouseDataInUI), new object[] { args.EventData });
-        }
-
-        private void UpdateMouseDataInUI(MarkerEventData data)
-        {*/
+        {
             if (ilosc_markerow != Wspolny.w_touchlessMgr.Markers.Count)
             {
-                start_x = Wspolny.w_touchlessMgr.Markers[Wspolny.w_touchlessMgr.Markers.Count - 1].CurrentData.X;
-                start_y = Wspolny.w_touchlessMgr.Markers[Wspolny.w_touchlessMgr.Markers.Count - 1].CurrentData.Y;
-                curent_x = 100;
-                curent_y = 100;
+                start_x =  Wspolny.w_touchlessMgr.Markers[Wspolny.w_touchlessMgr.Markers.Count - 1].CurrentData.X;
+                start_y =  Wspolny.w_touchlessMgr.Markers[Wspolny.w_touchlessMgr.Markers.Count - 1].CurrentData.Y;
+                
                 ilosc_markerow = Wspolny.w_touchlessMgr.Markers.Count;
-
-
             }
+
+            curent_x = Cursor.Position.X;
+            curent_y = Cursor.Position.Y; 
+
             int poz_x = 0;
             int poz_y = 0;
 
-            poz_x = Wspolny.w_touchlessMgr.Markers[0].CurrentData.X;
+            poz_x =  Wspolny.w_touchlessMgr.Markers[0].CurrentData.X;
             poz_y = Wspolny.w_touchlessMgr.Markers[0].CurrentData.Y;
 
           //  if (flaga_mouse == true)
@@ -333,7 +357,7 @@ namespace CatchMouseDll
                         curent_x += (start_x - poz_x) * przyspieszenie_x / 10;
                         if (Convert.ToInt32(curent_x) <= 10)
                             curent_x = 10;
-                       // SetCursorPos(Convert.ToInt32(curent_x), Convert.ToInt32(curent_y));
+                        SetCursorPos(Convert.ToInt32(curent_x), Convert.ToInt32(curent_y));
                         CurrTime = DateTime.Now;
                     }
                     else
@@ -350,7 +374,7 @@ namespace CatchMouseDll
                         curent_y -= (start_y - poz_y) * przyspieszenie_y / 10;
                         if (Convert.ToInt32(curent_y) <= 20)
                             curent_y = 10;
-                     //   SetCursorPos(Convert.ToInt32(curent_x), Convert.ToInt32(curent_y));
+                        SetCursorPos(Convert.ToInt32(curent_x), Convert.ToInt32(curent_y));
                         CurrTime = DateTime.Now;
                     }
                     else

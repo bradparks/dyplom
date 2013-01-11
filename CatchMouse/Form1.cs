@@ -9,14 +9,18 @@ using System.Windows.Forms;
 using CatchMouseDll;
 using TouchlessLib;
 
+using Hotkeys;
+using System.Runtime.InteropServices;
+
+
 namespace CatchMouse
 {
     public partial class Form1 : Form
     {
+        private Hotkeys.GlobalHotkey ghk;
         CatchMouseDll.CatchMouseDll CMdllka;
         int index_zaznaczonego_markera = 0;
-
-
+        
         public Form1()
         {
             InitializeComponent();
@@ -28,6 +32,8 @@ namespace CatchMouse
         {
             comboBox1.DataSource= CMdllka.touchlessMgr.Cameras;
             CMdllka.Markery.MarkerChanged += new Markery.Zmiana_Ilosci_Markerow(MarkersChanged);
+            ghk = new Hotkeys.GlobalHotkey(Constants.CTRL, Keys.Q, this);
+            ghk.Register();
         }
 
         private void MarkersChanged(object sender, EventArgs e)
@@ -58,6 +64,16 @@ namespace CatchMouse
             }
             MarkersChanged(this, e);
             
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == Hotkeys.Constants.WM_HOTKEY_MSG_ID)
+            {
+                //MessageBox.Show("Koniec Myszki");
+                CMdllka.Symulator_Myszki.Martwa_Strefa.Stop();
+            }
+            base.WndProc(ref m);
         }
 
         private void zmiana_markera()
@@ -134,9 +150,62 @@ namespace CatchMouse
             CMdllka.touchlessMgr.Markers[index_zaznaczonego_markera].SmoothingEnabled = checkBox1.Checked;
         }
 
+        #region strefa
         private void button4_Click(object sender, EventArgs e)
         {
-            CMdllka.Symulator_Myszki.Martwa_Strefa.start();
+            if (CMdllka.Symulator_Myszki.Martwa_Strefa.flga_dzialania == false)
+            {
+                List<int> lista = new List<int>();
+                for (int i = 0; i < checkedListBox1.Items.Count; i++)
+                {
+                    if (checkedListBox1.GetItemChecked(i) == true)
+                        lista.Add(i);
+                }
+                CMdllka.Symulator_Myszki.Martwa_Strefa.Start(lista);
+                button4.Text = "Stop";
+            }
+            else
+            {
+                CMdllka.Symulator_Myszki.Martwa_Strefa.Stop();
+                button4.Text = "Start";
+            }
         }
+
+        private void numericUpDown4_ValueChanged(object sender, EventArgs e)
+        {
+            CMdllka.Symulator_Myszki.Martwa_Strefa.martwa_x = Convert.ToInt32(numericUpDown4.Value);
+        }
+
+        private void numericUpDown5_ValueChanged(object sender, EventArgs e)
+        {
+            CMdllka.Symulator_Myszki.Martwa_Strefa.martwa_y = Convert.ToInt32(numericUpDown3.Value);
+        }
+
+        private void numericUpDown2_ValueChanged(object sender, EventArgs e)
+        {
+            CMdllka.Symulator_Myszki.Martwa_Strefa.przyspieszenie_x = Convert.ToInt32(numericUpDown2.Value);
+        }
+
+        private void numericUpDown3_ValueChanged(object sender, EventArgs e)
+        {
+            CMdllka.Symulator_Myszki.Martwa_Strefa.przyspieszenie_y = Convert.ToInt32(numericUpDown3.Value);
+        }
+
+        #endregion
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            textBox1.Text = CMdllka.Symulator_Myszki.Martwa_Strefa.curent_x.ToString();
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+        
     }
 }
