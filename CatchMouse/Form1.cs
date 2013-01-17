@@ -20,6 +20,7 @@ namespace CatchMouse
         private Hotkeys.GlobalHotkey ghk;
         CatchMouseDll.CatchMouseDll CMdllka;
         int index_zaznaczonego_markera = 0;
+        List<Camera> Camra = new List<Camera>();
         
         public Form1()
         {
@@ -30,7 +31,12 @@ namespace CatchMouse
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            comboBox1.DataSource= CMdllka.touchlessMgr.Cameras;
+            for (int i = 0; i < CMdllka.touchlessMgr.Cameras.Count; i++)
+            {
+                if(CMdllka.touchlessMgr.Cameras[i].ToString().Contains("VDP")==false )
+                    Camra.Add(CMdllka.touchlessMgr.Cameras[i]);
+            }
+            comboBox1.DataSource = Camra;
             CMdllka.Markery.MarkerChanged += new Markery.Zmiana_Ilosci_Markerow(MarkersChanged);
             ghk = new Hotkeys.GlobalHotkey(Constants.CTRL, Keys.Q, this);
             ghk.Register();
@@ -114,7 +120,8 @@ namespace CatchMouse
 
         private void comboBox1_SelectedIndexChanged_1(object sender, EventArgs e)
         {
-
+            //CMdllka.touchlessMgr.Cameras.IndexOf(Camra[comboBox1.SelectedIndex]);
+            pictureBox1 = CMdllka.Aktywacja_Obrazu.Przechwyt_Obrazu(CMdllka.touchlessMgr.Cameras.IndexOf(Camra[comboBox1.SelectedIndex]));
         }
 
         private void button3_Click_1(object sender, EventArgs e)

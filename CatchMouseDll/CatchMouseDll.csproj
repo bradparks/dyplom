@@ -83,18 +83,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CatchMouseDll.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="Click.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Click.Designer.cs">
+      <DependentUpon>Click.cs</DependentUpon>
     </Compile>
+    <Compile Include="Myszki.cs" />
     <Compile Include="Podklasy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="Click.resx">
+      <DependentUpon>Click.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,6 +1,6 @@
 ﻿namespace CatchMouseDll
 {
-    partial class Form1
+    partial class Click
     {
         /// <summary>
         /// Required designer variable.
@@ -42,6 +42,7 @@
             this.button1.TabIndex = 0;
             this.button1.Text = "Prawy";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // button2
             // 
