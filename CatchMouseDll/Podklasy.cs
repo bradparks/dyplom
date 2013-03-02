@@ -31,32 +31,110 @@ namespace CatchMouseDll
         public static Point srodek_zaznaczenia_markera;  //_markerCenter
         public static float promien_zaznaczenia_markera; //_markerRadius
 
-        public static int X()
+        private static List<int> x_difrent = new List<int>();
+        private static List<int> y_difrent = new List<int>();
+
+        /// <summary>
+        /// Uśrednione pozycje X
+        /// </summary>
+        /// <param name="mark"></param>
+        /// <returns></returns>
+        public static int X(List<Marker> mark)
         {
+            for (int i=0;x_difrent.Count < mark.Count;i++)
+            {
+                if (i == 0)
+                {
+                    x_difrent.Add(mark[i].CurrentData.X);
+                }
+                else
+                {
+                    x_difrent.Add(mark[i].CurrentData.X - mark[i - 1].CurrentData.X);
+                    MessageBox.Show(x_difrent.ToString());
+                }
+            }
             int suma_x = 0;
             int ilosc = 0;
-            object obi = new object();
-            foreach (Marker mk in Wspolny.w_touchlessMgr.Markers)
+            for (int i=0; i< mark.Count;i++)
             {
-                ilosc++;
-                suma_x += mk.CurrentData.X;
+                if (i == 0)
+                {
+                    if ((x_difrent[i+1] - 5) < (mark[i+1].CurrentData.X - mark[i].CurrentData.X) || (x_difrent[i+1] + 5) > (mark[i+1].CurrentData.X - mark[i].CurrentData.X))
+                    {
+                        suma_x += mark[i].CurrentData.X;
+                        ilosc++;
+                    }
+                    else
+                        MessageBox.Show("xo" + x_difrent[i + 1].ToString() + " != " + mark[i + 1].CurrentData.X.ToString() + " - " + mark[i].CurrentData.X.ToString());
+                }
+                else
+                {
+                    //sprawdzam czy marker nie został zgubiony 
+                    if ((x_difrent[i] - 5) < (mark[i].CurrentData.X - mark[i - 1].CurrentData.X) || (x_difrent[i] + 5) > (mark[i].CurrentData.X - mark[i - 1].CurrentData.X))
+                    {
+                        suma_x += mark[i].CurrentData.X;
+                        if (mark[i].CurrentData.X > 0)
+                            ilosc++;
+                    }
+                    else
+                        MessageBox.Show("xd" + x_difrent[i].ToString() + " != " + mark[i].CurrentData.X.ToString() + " - " + mark[i - 1].CurrentData.X.ToString());
+                }
             }
-            suma_x = suma_x / ilosc;
+            if ( ilosc!=0)
+                suma_x = suma_x / ilosc;
+            
             //MessageBox.Show(suma_x.ToString());
             return suma_x;
         }
 
-        public static int Y()
+        /// <summary>
+        /// Uśrednione pozycje Y
+        /// </summary>
+        /// <param name="mark"></param>
+        /// <returns></returns>
+        public static int Y(List<Marker> mark)
         {
+            for (int i = 0; y_difrent.Count < mark.Count; i++)
+            {
+                if (i == 0)
+                {
+                    y_difrent.Add(mark[i].CurrentData.Y);
+                }
+                else
+                {
+                    y_difrent.Add(mark[i].CurrentData.Y - mark[i - 1].CurrentData.Y);
+                }
+            }
+
             int suma_y = 0;
             int ilosc = 0;
-            object obi = new object();
-            foreach (Marker mk in Wspolny.w_touchlessMgr.Markers)
+            for (int i = 0; i < mark.Count; i++)
             {
-                ilosc++;
-                suma_y += mk.CurrentData.Y;
+                if (i == 0)
+                {
+                    if ((y_difrent[i + 1] - 5) < mark[i + 1].CurrentData.Y - mark[i].CurrentData.Y || (y_difrent[i + 1] + 5) > mark[i + 1].CurrentData.Y - mark[i].CurrentData.Y)
+                    {
+                        suma_y += mark[i].CurrentData.Y;
+                        ilosc++;
+                    }
+                    else
+                        MessageBox.Show("yo"+y_difrent[i+1].ToString() + " != " + mark[i+1].CurrentData.Y.ToString() + " - " + mark[i].CurrentData.Y.ToString());
+                }
+                else
+                {
+                    //sprawdzam czy marker nie został zgubiony 
+                    if ((y_difrent[i] - 5) < mark[i].CurrentData.Y - mark[i - 1].CurrentData.Y || (y_difrent[i] + 5) > mark[i].CurrentData.Y - mark[i - 1].CurrentData.Y)
+                    {
+                        suma_y += mark[i].CurrentData.Y;
+                        if (mark[i].CurrentData.Y > 0)
+                            ilosc++;
+                    }
+                    else
+                        MessageBox.Show("yd"+y_difrent[i].ToString()+" != "+mark[i].CurrentData.Y.ToString()+" - "+mark[i - 1].CurrentData.Y.ToString());
+                }
             }
-            suma_y = suma_y / ilosc;
+            if (ilosc>0)
+                suma_y = suma_y / ilosc;
             return suma_y;
         }
     }
@@ -68,7 +146,16 @@ namespace CatchMouseDll
         
         private DateTime czasOstatniejKlatki;
         private int licznikKlatek=0;
-        
+        private double Fps=0;
+        /// <summary>
+        /// Pobiera ilość klatek na sekunde z obecnej kamery
+        /// </summary>
+        public double fps
+        {
+            get { return Fps; }
+        }
+        private bool przechwyt = false;
+        private int numer_aktywnej_kamery = 0;
 
         /// <summary>
         /// konstruktor 
@@ -88,12 +175,36 @@ namespace CatchMouseDll
         {
             if (Wspolny.w_touchlessMgr.Cameras.Count > 0)
             {
-                // przechwycenie klatki z kamery
-                Wspolny.w_touchlessMgr.Cameras[0].OnImageCaptured += new EventHandler<CameraEventArgs>(OnImageCaptured);
-                Wspolny.w_touchlessMgr.CurrentCamera = Wspolny.w_touchlessMgr.Cameras[0];
-                //rysowanie ostatniej klatki
-                Wspolny.w_picturebox.Paint += new PaintEventHandler(RysowanieOstatniegoObrazu);
-                czasOstatniejKlatki = DateTime.Now;
+                if (przechwyt)
+                {
+                    // przechwycenie klatki z kamery
+                    Wspolny.w_touchlessMgr.Cameras[0].OnImageCaptured += new EventHandler<CameraEventArgs>(OnImageCaptured);
+                    Wspolny.w_touchlessMgr.CurrentCamera = Wspolny.w_touchlessMgr.Cameras[0];
+                    //rysowanie ostatniej klatki
+                    Wspolny.w_picturebox.Paint += new PaintEventHandler(RysowanieOstatniegoObrazu);
+                    czasOstatniejKlatki = DateTime.Now;
+                    numer_aktywnej_kamery = 0;
+                    przechwyt = true;
+                }
+                else
+                {
+                    try
+                    {
+                        Wspolny.w_touchlessMgr.Cameras[0].OnImageCaptured -= new EventHandler<CameraEventArgs>(OnImageCaptured);
+                        Wspolny.w_picturebox.Paint -= new PaintEventHandler(RysowanieOstatniegoObrazu);
+                        // przechwycenie klatki z kamery
+                        Wspolny.w_touchlessMgr.Cameras[0].OnImageCaptured += new EventHandler<CameraEventArgs>(OnImageCaptured);
+                        Wspolny.w_touchlessMgr.CurrentCamera = Wspolny.w_touchlessMgr.Cameras[0];
+                        //rysowanie ostatniej klatki
+                        Wspolny.w_picturebox.Paint += new PaintEventHandler(RysowanieOstatniegoObrazu);
+                        czasOstatniejKlatki = DateTime.Now;
+                        numer_aktywnej_kamery = 0;
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Błąd usuniecia kamery"); 
+                    }
+                }
             }
             else MessageBox.Show("Fatal error: Kamera nie jest podlaczona do komputera");   
             return Wspolny.w_picturebox;
@@ -108,12 +219,36 @@ namespace CatchMouseDll
         {
             if (Wspolny.w_touchlessMgr.Cameras.Count > numer_kamery)
             {
-                // przechwycenie klatki z kamery
-                Wspolny.w_touchlessMgr.Cameras[numer_kamery].OnImageCaptured += new EventHandler<CameraEventArgs>(OnImageCaptured);
-                Wspolny.w_touchlessMgr.CurrentCamera = Wspolny.w_touchlessMgr.Cameras[numer_kamery];
-                //rysowanie ostatniej klatki
-                Wspolny.w_picturebox.Paint += new PaintEventHandler(RysowanieOstatniegoObrazu);
-                czasOstatniejKlatki = DateTime.Now;
+                if (przechwyt)
+                {
+                    // przechwycenie klatki z kamery
+                    Wspolny.w_touchlessMgr.Cameras[numer_kamery].OnImageCaptured += new EventHandler<CameraEventArgs>(OnImageCaptured);
+                    Wspolny.w_touchlessMgr.CurrentCamera = Wspolny.w_touchlessMgr.Cameras[numer_kamery];
+                    //rysowanie ostatniej klatki
+                    Wspolny.w_picturebox.Paint += new PaintEventHandler(RysowanieOstatniegoObrazu);
+                    czasOstatniejKlatki = DateTime.Now;
+                    this.numer_aktywnej_kamery = numer_kamery;
+                    przechwyt = true;
+                }
+                else
+                {
+                    try
+                    {
+                        Wspolny.w_touchlessMgr.Cameras[this.numer_aktywnej_kamery].OnImageCaptured -= new EventHandler<CameraEventArgs>(OnImageCaptured);
+                        Wspolny.w_picturebox.Paint -= new PaintEventHandler(RysowanieOstatniegoObrazu);
+                        // przechwycenie klatki z kamery
+                        Wspolny.w_touchlessMgr.Cameras[numer_kamery].OnImageCaptured += new EventHandler<CameraEventArgs>(OnImageCaptured);
+                        Wspolny.w_touchlessMgr.CurrentCamera = Wspolny.w_touchlessMgr.Cameras[numer_kamery];
+                        //rysowanie ostatniej klatki
+                        Wspolny.w_picturebox.Paint += new PaintEventHandler(RysowanieOstatniegoObrazu);
+                        czasOstatniejKlatki = DateTime.Now;
+                        this.numer_aktywnej_kamery = numer_kamery;
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Błąd usuniecia kamery");
+                    }
+                }
             }
             else MessageBox.Show("Fatal error: Podany numer kamery jest za duzy");           
             return Wspolny.w_picturebox;
@@ -177,6 +312,12 @@ namespace CatchMouseDll
             // Przeliczanie FPS
             licznikKlatek++;
             double milliseconds = (DateTime.Now.Ticks - czasOstatniejKlatki.Ticks) / TimeSpan.TicksPerMillisecond;
+            if (milliseconds >= 1000)
+            {
+                Fps= Math.Round((licznikKlatek * 1000.0 / milliseconds),2);
+                licznikKlatek = 0;
+                czasOstatniejKlatki = DateTime.Now;
+            }
             if (Wspolny.pauza == false)
             {
                 Wspolny.ostatnia_klatka = args.Image;

@@ -21,20 +21,20 @@ namespace CatchMouseDll
     public class Symulator_Myszki
     {
         public Martwa_Strefa Martwa_Strefa = new Martwa_Strefa();
+        public Usrednianie Usrednianie = new Usrednianie();
     }
 
     public class Dane_Myszki
     {
         public DateTime CurrTime = DateTime.Now;
+        [DllImport("user32")]
+        protected static extern int SetCursorPos(int x, int y);
     }
     /// <summary>
     /// Klasa odpoweidzialna za symulacje myszy z strefą bezruchu
     /// </summary>
     public class Martwa_Strefa : Dane_Myszki
     {
-        [DllImport("user32")]
-        private static extern int SetCursorPos(int x, int y);
-
         /// <summary>
         /// Open window when cursor stop ower time[s]
         /// </summary>
@@ -94,8 +94,8 @@ namespace CatchMouseDll
         {
             if (ilosc_markerow != Wspolny.w_touchlessMgr.Markers.Count)
             {
-                start_x = data.X;
-                start_y = data.Y;
+                start_x = Wspolny.X(_markerSelected);
+                start_y = Wspolny.Y(_markerSelected);
 
                 ilosc_markerow = Wspolny.w_touchlessMgr.Markers.Count;
             }
@@ -105,8 +105,8 @@ namespace CatchMouseDll
             int poz_x = 0;
             int poz_y = 0;
 
-            poz_x = data.X;
-            poz_y = data.Y;
+            poz_x = Wspolny.X(_markerSelected);
+            poz_y = Wspolny.Y(_markerSelected);
             if (start_x > poz_x + martwa_x || start_x < poz_x - martwa_x)
             {
                 curent_x += (start_x - poz_x) * (przyspieszenie_x / 10) / _markerSelected.Count;
@@ -133,6 +133,51 @@ namespace CatchMouseDll
                     myForm.Location = new Point(Convert.ToInt32(curent_x) - 100, Convert.ToInt32(curent_y) - 100);
                     this.myForm.Visible = true;
                 }
+            }
+        }
+    }
+
+    public class Usrednianie : Dane_Myszki
+    {
+        public int czas_otwarcia_okienka = 5;
+        public int liczba_usrednianych_klatek = 5;
+        public double curent_x = 0;
+        public double curent_y = 0;
+
+        public bool flga_dzialania = false;
+        private List<int> x = new List<int>();
+        private List<int> y = new List<int>();
+        List<Marker> _markerSelected = new List<Marker>();
+
+        Click myForm;
+
+        public Usrednianie()
+        {
+            myForm = new Click(this);
+            myForm.Show();
+            myForm.Visible = false;
+        }
+
+        public void Start(List<int> numerek)
+        {
+            for (int i = 0; i < numerek.Count; i++)
+            {
+                _markerSelected.Add(Wspolny.w_touchlessMgr.Markers[numerek[i]]);
+                _markerSelected[i].OnChange += new EventHandler<MarkerEventArgs>(OnSelectedMouseUpdate);
+            }
+            flga_dzialania = true;
+            base.CurrTime = DateTime.Now;
+        }
+        public void OnSelectedMouseUpdate(object sender, MarkerEventArgs args)
+        {
+            myForm.BeginInvoke(new Action<MarkerEventData>(UpdateMarkerDataInUI), new object[] { args.EventData });
+        }
+
+        private void UpdateMarkerDataInUI(MarkerEventData data)
+        {
+            if (x.Count < liczba_usrednianych_klatek)
+            {
+                //x.Add(Wspolny.w_touchlessMgr.Markers
             }
         }
     }

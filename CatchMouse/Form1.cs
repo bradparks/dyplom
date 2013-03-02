@@ -21,12 +21,16 @@ namespace CatchMouse
         CatchMouseDll.CatchMouseDll CMdllka;
         int index_zaznaczonego_markera = 0;
         List<Camera> Camra = new List<Camera>();
+        System.Windows.Forms.Timer timer; // create a new timer
+        
         
         public Form1()
         {
             InitializeComponent();
             CMdllka = new CatchMouseDll.CatchMouseDll(pictureBox1);
             pictureBox1 = CMdllka.Aktywacja_Obrazu.Przechwyt_Obrazu();
+            timer = new System.Windows.Forms.Timer();
+            timer.Interval = 1000; //300000 = 5 minutes
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -40,6 +44,13 @@ namespace CatchMouse
             CMdllka.Markery.MarkerChanged += new Markery.Zmiana_Ilosci_Markerow(MarkersChanged);
             ghk = new Hotkeys.GlobalHotkey(Constants.CTRL, Keys.Q, this);
             ghk.Register();
+            timer.Tick += new EventHandler(TimerTickHandler); //add the event handler
+            timer.Start(); //start the timer
+        }
+
+        private void TimerTickHandler(object sender, EventArgs e)
+        {
+            label7.Text ="Obecny fps: "+ CMdllka.Aktywacja_Obrazu.fps.ToString();
         }
 
         private void MarkersChanged(object sender, EventArgs e)
@@ -146,7 +157,7 @@ namespace CatchMouse
         {
 
         }
-
+        #region Markery
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
             CMdllka.touchlessMgr.Markers[index_zaznaczonego_markera].Threshold =Convert.ToInt32(numericUpDown1.Value);
@@ -157,7 +168,13 @@ namespace CatchMouse
             CMdllka.touchlessMgr.Markers[index_zaznaczonego_markera].SmoothingEnabled = checkBox1.Checked;
         }
 
-        #region strefa
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            CMdllka.touchlessMgr.Markers[index_zaznaczonego_markera].Highlight = checkBox3.Checked;
+        }
+        #endregion
+       
+        #region Strefa
         private void button4_Click(object sender, EventArgs e)
         {
             if (CMdllka.Symulator_Myszki.Martwa_Strefa.flga_dzialania == false)
@@ -199,20 +216,46 @@ namespace CatchMouse
         }
 
         #endregion
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            
-        }
 
-        private void button5_Click(object sender, EventArgs e)
-        {
-            textBox1.Text = CMdllka.Symulator_Myszki.Martwa_Strefa.curent_x.ToString();
-        }
+        #region Usrednienie
+
+        #endregion
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
 
         }
+
+
+        private void label7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button5_Click_1(object sender, EventArgs e)
+        {
+            label7.Text = CMdllka.Aktywacja_Obrazu.fps.ToString();
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox2.Checked == false)
+            {
+                numericUpDown6.Visible = false;
+                CMdllka.touchlessMgr.Cameras[CMdllka.touchlessMgr.Cameras.IndexOf(Camra[comboBox1.SelectedIndex])].Fps = -1;
+            }
+            else
+            {
+                numericUpDown6.Visible = true;
+            }
+        }
+
+        private void numericUpDown6_ValueChanged(object sender, EventArgs e)
+        {
+            CMdllka.touchlessMgr.Cameras[CMdllka.touchlessMgr.Cameras.IndexOf(Camra[comboBox1.SelectedIndex])].Fps = Convert.ToInt32(numericUpDown6.Value);
+        }
+
+        
         
     }
 }
