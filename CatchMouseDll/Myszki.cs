@@ -149,6 +149,7 @@ namespace CatchMouseDll
         private List<int> y = new List<int>();
         List<Marker> _markerSelected = new List<Marker>();
 
+
         Click myForm;
 
         public Usrednianie()
@@ -168,6 +169,18 @@ namespace CatchMouseDll
             flga_dzialania = true;
             base.CurrTime = DateTime.Now;
         }
+        /// <summary>
+        /// Zatrzymanie Martwej Strefy
+        /// </summary>
+        public void Stop()
+        {
+            foreach (Marker mk in _markerSelected)
+            {
+                mk.OnChange -= new EventHandler<MarkerEventArgs>(OnSelectedMouseUpdate);
+            }
+            _markerSelected.Clear();
+            flga_dzialania = false;
+        }
         public void OnSelectedMouseUpdate(object sender, MarkerEventArgs args)
         {
             myForm.BeginInvoke(new Action<MarkerEventData>(UpdateMarkerDataInUI), new object[] { args.EventData });
@@ -177,7 +190,37 @@ namespace CatchMouseDll
         {
             if (x.Count < liczba_usrednianych_klatek)
             {
-                //x.Add(Wspolny.w_touchlessMgr.Markers
+                x.Add(Wspolny.X(_markerSelected));
+                y.Add(Wspolny.Y(_markerSelected));
+            }
+            else
+            {
+                x.RemoveAt(0);
+                x.Add(Wspolny.X(_markerSelected));
+                y.RemoveAt(0);
+                y.Add(Wspolny.Y(_markerSelected));
+
+                curent_x = Cursor.Position.X;
+                curent_y = Cursor.Position.Y;
+
+                int x_suma = 0;
+                int y_suma = 0;
+                for (int i = 0; i < liczba_usrednianych_klatek; i++)
+                {
+                    x_suma += x[i];
+                    y_suma += y[i];
+                }
+                int x_wynik = Convert.ToInt32(x_suma/liczba_usrednianych_klatek-1);
+                int y_wynik = Convert.ToInt32(y_suma/liczba_usrednianych_klatek-1);
+                double y_screen_max = SystemInformation.PrimaryMonitorSize.Height;
+                double x_screen_max = SystemInformation.PrimaryMonitorSize.Width;
+                double x_camera_max = Wspolny.ostatnia_klatka.Width;
+                double y_camera_max = Wspolny.ostatnia_klatka.Height;
+                double x_waga = x_screen_max / x_camera_max;
+                double y_waga = y_screen_max / y_camera_max;
+                SetCursorPos(Convert.ToInt32(x_wynik*x_waga),Convert.ToInt32(y_wynik*y_waga));
+               // MessageBox.Show(x_wynik.ToString() + "  " + x_waga.ToString() + "   " + Convert.ToInt32(x_wynik * x_waga).ToString() +"\n"+
+                //    x_screen_max.ToString() + "  " + x_camera_max.ToString());
             }
         }
     }

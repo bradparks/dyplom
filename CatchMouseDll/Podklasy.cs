@@ -58,8 +58,12 @@ namespace CatchMouseDll
             for (int i=0; i< mark.Count;i++)
             {
                 if (i == 0)
-                {
-                    if ((x_difrent[i+1] - 5) < (mark[i+1].CurrentData.X - mark[i].CurrentData.X) || (x_difrent[i+1] + 5) > (mark[i+1].CurrentData.X - mark[i].CurrentData.X))
+                {//blad ??
+                    if (x_difrent.Count == 1)
+                    {
+                        return mark[0].CurrentData.X;
+                    }
+                    else if ((x_difrent[i + 1] - 5) < (mark[i + 1].CurrentData.X - mark[i].CurrentData.X) || (x_difrent[i + 1] + 5) > (mark[i + 1].CurrentData.X - mark[i].CurrentData.X))
                     {
                         suma_x += mark[i].CurrentData.X;
                         ilosc++;
@@ -112,7 +116,11 @@ namespace CatchMouseDll
             {
                 if (i == 0)
                 {
-                    if ((y_difrent[i + 1] - 5) < mark[i + 1].CurrentData.Y - mark[i].CurrentData.Y || (y_difrent[i + 1] + 5) > mark[i + 1].CurrentData.Y - mark[i].CurrentData.Y)
+                    if (y_difrent.Count == 1)
+                    {
+                        return mark[0].CurrentData.Y;
+                    }
+                    else if ((y_difrent[i + 1] - 5) < mark[i + 1].CurrentData.Y - mark[i].CurrentData.Y || (y_difrent[i + 1] + 5) > mark[i + 1].CurrentData.Y - mark[i].CurrentData.Y)
                     {
                         suma_y += mark[i].CurrentData.Y;
                         ilosc++;

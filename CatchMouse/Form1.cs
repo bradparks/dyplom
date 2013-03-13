@@ -218,7 +218,25 @@ namespace CatchMouse
         #endregion
 
         #region Usrednienie
-
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (CMdllka.Symulator_Myszki.Usrednianie.flga_dzialania == false)
+            {
+                List<int> lista = new List<int>();
+                for (int i = 0; i < checkedListBox1.Items.Count; i++)
+                {
+                    if (checkedListBox1.GetItemChecked(i) == true)
+                        lista.Add(i);
+                }
+                CMdllka.Symulator_Myszki.Usrednianie.Start(lista);
+                button5.Text = "Stop";
+            }
+            else
+            {
+                CMdllka.Symulator_Myszki.Usrednianie.Stop();
+                button5.Text = "Start";
+            }
+        }
         #endregion
 
         private void pictureBox1_Click(object sender, EventArgs e)
@@ -254,6 +272,8 @@ namespace CatchMouse
         {
             CMdllka.touchlessMgr.Cameras[CMdllka.touchlessMgr.Cameras.IndexOf(Camra[comboBox1.SelectedIndex])].Fps = Convert.ToInt32(numericUpDown6.Value);
         }
+
+        
 
         
         

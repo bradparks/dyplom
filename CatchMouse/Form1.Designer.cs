@@ -56,6 +56,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.numericUpDown6 = new System.Windows.Forms.NumericUpDown();
+            this.button5 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -66,6 +67,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
+            this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).BeginInit();
             this.SuspendLayout();
             // 
@@ -269,7 +271,7 @@
             // numericUpDown2
             // 
             this.numericUpDown2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.numericUpDown2.Location = new System.Drawing.Point(7, 87);
+            this.numericUpDown2.Location = new System.Drawing.Point(9, 87);
             this.numericUpDown2.Name = "numericUpDown2";
             this.numericUpDown2.Size = new System.Drawing.Size(47, 29);
             this.numericUpDown2.TabIndex = 3;
@@ -292,6 +294,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.button5);
             this.tabPage3.Location = new System.Drawing.Point(4, 28);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Size = new System.Drawing.Size(337, 241);
@@ -381,6 +384,16 @@
             this.numericUpDown6.Visible = false;
             this.numericUpDown6.ValueChanged += new System.EventHandler(this.numericUpDown6_ValueChanged);
             // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(7, 7);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(151, 45);
+            this.button5.TabIndex = 0;
+            this.button5.Text = "Start";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -412,6 +425,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
+            this.tabPage3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -448,6 +462,7 @@
         private System.Windows.Forms.NumericUpDown numericUpDown6;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Button button5;
     }
 }
 
