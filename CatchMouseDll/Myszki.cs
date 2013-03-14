@@ -149,7 +149,7 @@ namespace CatchMouseDll
         private List<int> y = new List<int>();
         List<Marker> _markerSelected = new List<Marker>();
 
-
+        int rodzaj_sredniej = 0;
         Click myForm;
 
         public Usrednianie()
@@ -169,6 +169,29 @@ namespace CatchMouseDll
             flga_dzialania = true;
             base.CurrTime = DateTime.Now;
         }
+
+        public string Rodzaj_sredniej
+        {
+            get
+            {
+                if (rodzaj_sredniej == 0)
+                    return "SMA";
+                else if (rodzaj_sredniej == 1)
+                    return "WMA";
+                else 
+                    return "EMA";
+            }
+            set
+            {
+                if (value == "SMA" || value == "sma" || value == "0")
+                    rodzaj_sredniej = 0;
+                else if (value == "WMA" || value == "wma" || value == "1")
+                    rodzaj_sredniej = 1;
+                else if (value == "EMA" || value == "ema" || value == "2")
+                    rodzaj_sredniej = 2;
+            }
+        }
+
         /// <summary>
         /// Zatrzymanie Martwej Strefy
         /// </summary>
@@ -185,7 +208,15 @@ namespace CatchMouseDll
         {
             myForm.BeginInvoke(new Action<MarkerEventData>(UpdateMarkerDataInUI), new object[] { args.EventData });
         }
-
+        private double potega(double wartosc, int potega)
+        {
+            double zwrot = 0;
+            for (int i=0;i<potega;i++)
+            {
+                zwrot = wartosc * zwrot; 
+            }
+            return zwrot;
+        }
         private void UpdateMarkerDataInUI(MarkerEventData data)
         {
             if (x.Count < liczba_usrednianych_klatek)
@@ -205,13 +236,63 @@ namespace CatchMouseDll
 
                 int x_suma = 0;
                 int y_suma = 0;
-                for (int i = 0; i < liczba_usrednianych_klatek; i++)
+                
+                int x_wynik=0;
+                int y_wynik=0;
+                if (rodzaj_sredniej == 0)
                 {
-                    x_suma += x[i];
-                    y_suma += y[i];
+                    for (int i = 0; i < liczba_usrednianych_klatek; i++)
+                    {
+                        x_suma += x[i];
+                        y_suma += y[i];
+                    }
+                    x_wynik = Convert.ToInt32(x_suma / liczba_usrednianych_klatek - 1);
+                    y_wynik = Convert.ToInt32(y_suma / liczba_usrednianych_klatek - 1);
                 }
-                int x_wynik = Convert.ToInt32(x_suma/liczba_usrednianych_klatek-1);
-                int y_wynik = Convert.ToInt32(y_suma/liczba_usrednianych_klatek-1);
+                else if (rodzaj_sredniej == 1)
+                {
+                    int dzielnik=0;
+                    for (int i = 0; i < liczba_usrednianych_klatek; i++)
+                    {
+                        if (i == 0)
+                        {
+                            x_suma += x[i];
+                            y_suma += y[i];
+                        }
+                        else
+                        {
+                            x_suma += x[i] * i;
+                            y_suma += y[i] * i;
+                        }
+                        dzielnik +=i;
+                    }
+                    x_wynik = Convert.ToInt32(x_suma / dzielnik);
+                    y_wynik = Convert.ToInt32(y_suma / dzielnik);
+                }
+                else if (rodzaj_sredniej == 2)
+                {
+                    int dzielnik = 0;
+                    double alfa = 2 / liczba_usrednianych_klatek;
+                    for (int i = 0; i < liczba_usrednianych_klatek; i++)
+                    {
+                        if (i == 0)
+                        {
+                            x_suma += x[i];
+                            y_suma += y[i];
+                            dzielnik += 1;
+                        }
+                        else
+                        {
+                            int a = Convert.ToInt32(potega((1 - alfa), i));
+                            x_suma += x[i] * a;
+                            y_suma += y[i] * a;
+                            dzielnik += a;
+                        }
+                        
+                    }
+                    x_wynik = Convert.ToInt32(x_suma / dzielnik);
+                    y_wynik = Convert.ToInt32(y_suma / dzielnik);
+                }
                 double y_screen_max = SystemInformation.PrimaryMonitorSize.Height;
                 double x_screen_max = SystemInformation.PrimaryMonitorSize.Width;
                 double x_camera_max = Wspolny.ostatnia_klatka.Width;

@@ -88,7 +88,16 @@ namespace CatchMouse
             if (m.Msg == Hotkeys.Constants.WM_HOTKEY_MSG_ID)
             {
                 //MessageBox.Show("Koniec Myszki");
-                CMdllka.Symulator_Myszki.Martwa_Strefa.Stop();
+                if (CMdllka.Symulator_Myszki.Martwa_Strefa.flga_dzialania == true)
+                {
+                    CMdllka.Symulator_Myszki.Martwa_Strefa.Stop();
+                    button4.Text = "Start";
+                }
+                if (CMdllka.Symulator_Myszki.Usrednianie.flga_dzialania == true)
+                {
+                    CMdllka.Symulator_Myszki.Usrednianie.Stop();
+                    button5.Text = "Start";
+                }
             }
             base.WndProc(ref m);
         }
@@ -271,6 +280,11 @@ namespace CatchMouse
         private void numericUpDown6_ValueChanged(object sender, EventArgs e)
         {
             CMdllka.touchlessMgr.Cameras[CMdllka.touchlessMgr.Cameras.IndexOf(Camra[comboBox1.SelectedIndex])].Fps = Convert.ToInt32(numericUpDown6.Value);
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CMdllka.Symulator_Myszki.Usrednianie.Rodzaj_sredniej = comboBox2.SelectedItem.ToString();
         }
 
         
